@@ -33,6 +33,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/fakenews
       REDIS_URL: redis://redis:6379/0
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
     depends_on:
       db:
         condition: service_healthy
@@ -50,6 +51,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/fakenews
       REDIS_URL: redis://redis:6379/0
       OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
     depends_on:
       db:
         condition: service_healthy

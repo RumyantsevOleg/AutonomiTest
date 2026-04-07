@@ -3,7 +3,10 @@ import openai
 from app.config import settings
 from app.models import Article, ChatMessage
 
-client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+client = openai.OpenAI(
+    api_key=settings.OPENAI_API_KEY,
+    base_url=settings.OPENAI_BASE_URL,
+)
 
 
 def chat_about_article(

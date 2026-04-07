@@ -4,7 +4,10 @@ import openai
 
 from app.config import settings
 
-client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+client = openai.OpenAI(
+    api_key=settings.OPENAI_API_KEY,
+    base_url=settings.OPENAI_BASE_URL,
+)
 
 
 def transform_article_content(
