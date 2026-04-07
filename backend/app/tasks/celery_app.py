@@ -18,4 +18,4 @@ celery.conf.update(
     task_max_retries=3,
 )
 
-celery.autodiscover_tasks(["app.tasks"])
+celery.autodiscover_tasks(["app.tasks"], related_name="transform")
