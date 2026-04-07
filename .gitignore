@@ -1,0 +1,22 @@
+# Environment
+.env
+*.pyc
+__pycache__/
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+pgdata/
