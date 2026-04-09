@@ -1,6 +1,52 @@
 import type { FormEvent } from "react";
 import { useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { useChat } from "../hooks/useChat";
+
+// Tailwind-styled renderers for markdown elements. react-markdown ignores
+// raw HTML by default, so this is XSS-safe without extra sanitization.
+const markdownComponents = {
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p className="mb-2 last:mb-0">{children}</p>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul className="list-disc pl-5 mb-2 last:mb-0 space-y-0.5">{children}</ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol className="list-decimal pl-5 mb-2 last:mb-0 space-y-0.5">{children}</ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => <li>{children}</li>,
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong className="font-semibold">{children}</strong>
+  ),
+  em: ({ children }: { children?: React.ReactNode }) => (
+    <em className="italic">{children}</em>
+  ),
+  code: ({ children }: { children?: React.ReactNode }) => (
+    <code className="bg-gray-200 text-gray-800 px-1 py-0.5 rounded text-xs font-mono">
+      {children}
+    </code>
+  ),
+  h1: ({ children }: { children?: React.ReactNode }) => (
+    <h1 className="text-base font-bold mb-2 mt-1">{children}</h1>
+  ),
+  h2: ({ children }: { children?: React.ReactNode }) => (
+    <h2 className="text-sm font-bold mb-2 mt-1">{children}</h2>
+  ),
+  h3: ({ children }: { children?: React.ReactNode }) => (
+    <h3 className="text-sm font-semibold mb-1 mt-1">{children}</h3>
+  ),
+  a: ({ children, href }: { children?: React.ReactNode; href?: string }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 hover:underline"
+    >
+      {children}
+    </a>
+  ),
+};
 
 export default function ChatPanel({ articleId }: { articleId: number }) {
   const { messages, sending, error, send } = useChat(articleId);
@@ -40,7 +86,13 @@ export default function ChatPanel({ articleId }: { articleId: number }) {
                   : "bg-gray-100 text-gray-900"
               }`}
             >
-              {msg.content}
+              {msg.role === "assistant" ? (
+                <ReactMarkdown components={markdownComponents}>
+                  {msg.content}
+                </ReactMarkdown>
+              ) : (
+                msg.content
+              )}
             </div>
           </div>
         ))}

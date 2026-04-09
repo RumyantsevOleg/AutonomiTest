@@ -1,5 +1,7 @@
 import asyncio
 import datetime
+import html
+import re
 from email.utils import parsedate_to_datetime
 
 import feedparser
@@ -8,6 +10,24 @@ from sqlmodel import Session, select
 
 from app.models import Article, Source, TransformStatus
 from app.tasks.transform import transform_article
+
+_HTML_TAG_RE = re.compile(r"<[^>]+>")
+_WHITESPACE_RE = re.compile(r"\s+")
+
+
+def _strip_html(text: str) -> str:
+    """Remove HTML tags, unescape entities, and collapse whitespace.
+
+    RSS feeds (Guardian, NYT, NPR) return descriptions with mixed HTML —
+    ``<p>``, ``<a>``, ``&amp;``, etc. We normalize on ingestion so the DB
+    holds clean plain text, and both the LLM transformer and the frontend
+    don't need to deal with markup.
+    """
+    if not text:
+        return ""
+    cleaned = _HTML_TAG_RE.sub("", text)
+    cleaned = html.unescape(cleaned)
+    return _WHITESPACE_RE.sub(" ", cleaned).strip()
 
 
 def _parse_pub_date(entry: dict) -> datetime.datetime | None:
@@ -92,9 +112,9 @@ async def scrape_all(session: Session) -> dict:
 
             article = Article(
                 source_id=source.id,
-                original_title=entry.get("title", ""),
-                original_description=entry.get(
-                    "summary", entry.get("description", "")
+                original_title=_strip_html(entry.get("title", "")),
+                original_description=_strip_html(
+                    entry.get("summary", entry.get("description", ""))
                 ),
                 original_url=url,
                 published_at=_parse_pub_date(entry),
