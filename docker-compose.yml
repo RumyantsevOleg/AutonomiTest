@@ -28,12 +28,13 @@ services:
   backend:
     build: ./backend
     command: >
-      sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 3001 --reload"
+      sh -c "PYTHONPATH=/app alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 3001 --reload"
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/fakenews
       REDIS_URL: redis://redis:6379/0
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-}
+      PYTHONPATH: /app
     depends_on:
       db:
         condition: service_healthy
