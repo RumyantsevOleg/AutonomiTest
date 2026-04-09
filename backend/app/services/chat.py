@@ -17,9 +17,15 @@ def chat_about_article(
             "role": "system",
             "content": (
                 "You are a helpful assistant discussing a news article. "
-                "Answer questions based on both the original and satirical versions.\n\n"
+                "Answer questions based on both the original and satirical versions "
+                "provided below. Do NOT invent facts that are not present in the "
+                "article text — if the user asks about something not covered, say so. "
+                "When making factual claims, include a markdown link to the original "
+                "article URL so the user can verify: [Read the original]"
+                f"({article.original_url})\n\n"
                 f"Original title: {article.original_title}\n"
                 f"Original description: {article.original_description}\n"
+                f"Original URL: {article.original_url}\n"
                 f"Satirical title: {article.fake_title}\n"
                 f"Satirical description: {article.fake_description}\n"
                 f"Source: {article.source.name}\n"
