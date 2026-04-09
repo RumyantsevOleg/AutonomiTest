@@ -75,10 +75,21 @@ Celery Worker
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `OPENAI_API_KEY` | Yes | API key for the LLM provider |
-| `OPENAI_BASE_URL` | No | Custom base URL for OpenAI-compatible providers (e.g. `https://openrouter.ai/api/v1`) |
-| `DATABASE_URL` | No | PostgreSQL connection string (defaults to Docker DB) |
-| `REDIS_URL` | No | Redis connection string (defaults to Docker Redis) |
+| `OPENAI_API_KEY` | Yes | API key for the LLM provider. Used by both the transformer and chat services. |
+| `OPENAI_BASE_URL` | No | Custom base URL for OpenAI-compatible providers (e.g. `https://openrouter.ai/api/v1`). Leave unset to use OpenAI directly. |
+| `DATABASE_URL` | No (Docker) / Yes (local dev) | PostgreSQL connection string. Auto-injected by `docker-compose.yml` for containerized runs; must be set manually when running the backend locally without Docker. |
+| `REDIS_URL` | No (Docker) / Yes (local dev) | Redis connection string. Used by Celery as **both the message broker** (to enqueue transform jobs) **and the result backend** (to track task state). Auto-injected by `docker-compose.yml`; override only for local dev. |
+
+**For Docker Compose users:** the only variable you need to set in `.env` is `OPENAI_API_KEY` (and optionally `OPENAI_BASE_URL`). Everything else is wired up automatically in `docker-compose.yml`.
+
+### Why Redis?
+
+Redis plays two roles in this project, both driven by Celery:
+
+1. **Broker** — when the `/api/scrape` endpoint finishes inserting new articles, it pushes one transform job per article into a Redis list. The Celery worker pops jobs off that list and processes them in the background.
+2. **Result backend** — Celery stores task state (pending / started / success / failure / retry) in Redis, so retries can be coordinated and failures don't get lost silently.
+
+A single Redis instance handles both concerns here (`REDIS_URL` is used for broker and backend).
 
 ## Project Structure
 
